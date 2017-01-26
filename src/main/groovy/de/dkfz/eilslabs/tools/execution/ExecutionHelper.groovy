@@ -8,7 +8,6 @@
 package de.dkfz.eilslabs.tools.execution
 
 import de.dkfz.eilslabs.tools.logging.LoggerWrapper
-import de.dkfz.eilslabs.tools.constants.Constants
 
 import java.lang.reflect.Field
 
@@ -40,7 +39,7 @@ class ExecutionHelper {
         //Process process = Roddy.getLocalCommandSet().getShellExecuteCommand(command).execute();
         Process process = command.execute();
 
-        final String separator = Constants.ENV_LINESEPARATOR;
+        final String separator = System.getProperty("line.separator");
         process.waitFor();
         if(process.exitValue()) {
             throw new RuntimeException("Process could not be run" + separator + "\tCommand: sh -c "+ command + separator + "\treturn code is: " + process.exitValue())

@@ -7,8 +7,6 @@
 package de.dkfz.eilslabs.tools.logging
 
 import de.dkfz.eilslabs.tools.conversion.InfoObject
-import de.dkfz.eilslabs.tools.constants.Constants
-import de.dkfz.eilslabs.tools.conversion.ConversionHelperMethods
 import org.apache.commons.io.filefilter.WildcardFileFilter
 
 import java.util.logging.*
@@ -132,7 +130,7 @@ public class LoggerWrapper {
         try {
             //if (!ConversionHelperMethods.toBoolean(Roddy.getApplicationProperty("logExtensively", "true"), true)) return;
             if (!logExtensively) return;
-            getLogFile() << [this.consoleLogger.getName(), level, text, ex?:"NoExceptionThrown"].join("\t") << Constants.ENV_LINESEPARATOR;
+            getLogFile() << [this.consoleLogger.getName(), level, text, ex?:"NoExceptionThrown"].join("\t") << System.getProperty("line.separator");
         } catch (Exception ignored) {
         }
     }
@@ -171,7 +169,7 @@ public class LoggerWrapper {
             for (int i = 0; i < 3 && stackTrace == null; i++)
                 stackTrace = exception.getStackTrace();
             if (stackTrace != null)
-                return joinArray(stackTrace, Constants.ENV_LINESEPARATOR);
+                return joinArray(stackTrace, System.getProperty("line.separator"));
     }
 
     private static String joinArray(Object[] array, String separator) {
@@ -230,7 +228,7 @@ public class LoggerWrapper {
             @Override
             public String format(LogRecord r) {
                 if (LoggerWrapper.getVerbosityLevel() == 1)
-                    return r.getMessage() + Constants.ENV_LINESEPARATOR;
+                    return r.getMessage() + System.getProperty("line.separator")
                 StringBuilder sb = new StringBuilder();
                 sb.append(r.getLevel()).append(" ").append(r.getSourceMethodName()).append(" ").append(r.getLoggerName()).append(":\t").append(formatMessage(r)).append(System.getProperty("line.separator"));
                 if (null != r.getThrown()) {

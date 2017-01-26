@@ -6,7 +6,7 @@
 
 package de.dkfz.eilslabs.tools.logging
 
-import de.dkfz.eilslabs.tools.constants.Constants
+
 import de.dkfz.eilslabs.tools.constants.StringConstants
 import de.dkfz.eilslabs.tools.execution.ExecutionHelper
 import groovy.io.FileType
@@ -192,7 +192,7 @@ class IOHelperMethods {
             for (int i = 0; i < 3 && stackTrace == null; i++)
                 stackTrace = exception.getStackTrace();
             if (stackTrace != null)
-                return joinArray(stackTrace, Constants.ENV_LINESEPARATOR);
+                return joinArray(stackTrace, System.getProperty("line.separator"));
         } catch (Exception ex) {
             logger.info("No stacktrace could be printed for an exception.")
             return "";
@@ -253,11 +253,11 @@ class IOHelperMethods {
                 String md5OfFile = getMD5OfFile(file)
                 md5s << md5OfDir + md5OfFile
         }
-        return getMD5OfText(md5s.join(Constants.ENV_LINESEPARATOR));
+        return getMD5OfText(md5s.join(System.getProperty("line.separator")));
     }
 
     public static synchronized void appendLineToFile(File file, String line) {
-        file.append(line + Constants.ENV_LINESEPARATOR);
+        file.append(line + System.getProperty("line.separator"));
     }
 
     public static File assembleLocalPath(String rootPath, String... structure) {
