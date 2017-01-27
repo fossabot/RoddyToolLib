@@ -12,7 +12,6 @@ import de.dkfz.eilslabs.tools.execution.ExecutionHelper
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 
-//import de.dkfz.roddy.core.RunService
 /**
  * Contains methods which print out text on the console, like listworkflows.
  * This is a bit easier in groovy so we'll use it for these tasks.

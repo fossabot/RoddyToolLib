@@ -74,7 +74,7 @@ public class BufferValue {
         return "" + (alignedValue * baseUnit.multiplier / unit.multiplier as Long) + unit.name()
     }
 
-    public Long toNumber(BufferUnit unit = BufferUnit.M) {
+    public Long toLong(BufferUnit unit = BufferUnit.M) {
         if (alignedValue < unit.multiplier)
             return alignedValue
         return alignedValue * baseUnit.multiplier / unit.multiplier as Long

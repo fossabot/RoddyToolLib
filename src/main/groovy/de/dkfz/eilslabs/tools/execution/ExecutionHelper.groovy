@@ -46,7 +46,11 @@ class ExecutionHelper {
         }
 
         def text = process.text
-        return text.length() > 0 ? text[0 .. -2] : text; //Cut off trailing "\n"
+        return chomp(text) //Cut off trailing "\n"
+    }
+
+    public static String chomp(String text) {
+        text.length() >= 2 ? text[0..-2] : text
     }
 
     /**

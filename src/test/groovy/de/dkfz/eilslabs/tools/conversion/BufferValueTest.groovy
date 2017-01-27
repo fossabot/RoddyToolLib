@@ -76,7 +76,7 @@ public class BufferValueTest {
         validAndExpectedNumberValues.each {
             String value, long expectedValue ->
                 BufferValue testValue = new BufferValue(value);
-                assert testValue.toNumber() == expectedValue;
+                assert testValue.toLong() == expectedValue;
         }
     }
 }
