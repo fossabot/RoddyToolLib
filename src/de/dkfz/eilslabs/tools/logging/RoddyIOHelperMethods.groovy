@@ -8,7 +8,7 @@ package de.dkfz.eilslabs.tools.logging
 
 
 import de.dkfz.eilslabs.tools.constants.StringConstants
-import de.dkfz.eilslabs.tools.execution.ExecutionHelper
+import ExecutionHelper
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -21,7 +21,7 @@ import org.apache.commons.codec.digest.DigestUtils
  * Time: 09:09
  */
 @groovy.transform.CompileStatic
-class IOHelperMethods {
+class RoddyIOHelperMethods {
 
 
     public static abstract class Compressor {
@@ -110,7 +110,7 @@ class IOHelperMethods {
         }
     }
 
-    private static LoggerWrapper logger = LoggerWrapper.getLogger(IOHelperMethods.class.getSimpleName());
+    private static LoggerWrapper logger = LoggerWrapper.getLogger(RoddyIOHelperMethods.class.getSimpleName());
 
     private static Compressor compressor = new NativeLinuxZipCompressor();
 

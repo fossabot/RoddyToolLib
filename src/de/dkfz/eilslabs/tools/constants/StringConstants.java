@@ -33,7 +33,7 @@ public class StringConstants {
     public static final String SPLIT_SBRACKET_LEFT = "\\[";
     public static final String SPLIT_SBRACKET_RIGHT = "\\[";
 
-    public static final String STOP = ".";
+    public static final String STOP = "";
     public static final String COLON = ":";
     public static final String SEMICOLON = ";";
     public static final String COMMA = ",";
@@ -42,7 +42,7 @@ public class StringConstants {
     public static final String UNDERSCORE = "_";
     public static final String PLUS = "+";
     public static final String TILDE = "~";
-    public static final String DOUBLESTOP = ".";
+    public static final String DOUBLESTOP = "";
     public static final String SBRACKET_LEFT = "[";
     public static final String SBRACKET_RIGHT = "]";
     public static final String BRACE_LEFT = "{";

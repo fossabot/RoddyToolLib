@@ -7,7 +7,7 @@
 
 package de.dkfz.eilslabs.tools.execution
 
-import de.dkfz.eilslabs.tools.logging.LoggerWrapper
+import LoggerWrapper
 
 import java.lang.reflect.Field
 
