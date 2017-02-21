@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2016 eilslabs.
+ * Copyright (c) 2017 eilslabs.
  *
  * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
  */
 
-package de.dkfz.eilslabs.tools.logging
+package de.dkfz.roddy.tools
 
 
-import de.dkfz.eilslabs.tools.constants.StringConstants
-import ExecutionHelper
+import de.dkfz.roddy.StringConstants
+import de.dkfz.roddy.execution.io.ExecutionHelper
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 

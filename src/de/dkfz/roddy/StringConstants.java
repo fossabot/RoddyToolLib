@@ -4,7 +4,7 @@
  * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
  */
 
-package de.dkfz.eilslabs.tools.constants;
+package de.dkfz.roddy;
 
 /**
  */

@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2016 eilslabs.
+ * Copyright (c) 2017 eilslabs.
  *
  * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
  */
 
-package de.dkfz.eilslabs.tools.logging
+package de.dkfz.roddy.tools
 
-import de.dkfz.eilslabs.tools.conversion.InfoObject
 import org.apache.commons.io.filefilter.WildcardFileFilter
 
 import java.util.logging.*
@@ -95,7 +94,7 @@ public class LoggerWrapper {
      */
     private static void manageLogFileCount() {
         try {
-            //int maximumLogFilesPerPrefix = ConversionHelperMethods.toInt(Roddy.getApplicationProperty("maximumLogFilesPerPrefix"), 32);
+            //int maximumLogFilesPerPrefix = RoddyConversionHelperMethods.toInt(Roddy.getApplicationProperty("maximumLogFilesPerPrefix"), 32);
             String logFilesPrefix = getLogfilesPrefix()
 
             File[] files = applicationLogDirectory.listFiles((FilenameFilter) new WildcardFileFilter(logFilesPrefix + "*")).sort() as File[];
@@ -128,7 +127,7 @@ public class LoggerWrapper {
 
     private synchronized void logToLogFile(Level level, String text, Throwable ex) {
         try {
-            //if (!ConversionHelperMethods.toBoolean(Roddy.getApplicationProperty("logExtensively", "true"), true)) return;
+            //if (!RoddyConversionHelperMethods.toBoolean(Roddy.getApplicationProperty("logExtensively", "true"), true)) return;
             if (!logExtensively) return;
             getLogFile() << [this.consoleLogger.getName(), level, text, ex?:"NoExceptionThrown"].join("\t") << System.getProperty("line.separator");
         } catch (Exception ignored) {

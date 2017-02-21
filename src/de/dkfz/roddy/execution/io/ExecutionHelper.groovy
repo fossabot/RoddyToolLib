@@ -1,13 +1,13 @@
 
 /*
- * Copyright (c) 2016 eilslabs.
+ * Copyright (c) 2017 eilslabs.
  *
  * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
  */
 
-package de.dkfz.eilslabs.tools.execution
+package de.dkfz.roddy.execution.io
 
-import LoggerWrapper
+import de.dkfz.roddy.tools.LoggerWrapper
 
 import java.lang.reflect.Field
 
