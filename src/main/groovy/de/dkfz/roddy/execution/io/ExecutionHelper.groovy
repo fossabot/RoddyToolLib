@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2017 eilslabs.
  *
@@ -37,12 +36,12 @@ class ExecutionHelper {
     public static String executeSingleCommand(String command) {
         //TODO What an windows systems?
         //Process process = Roddy.getLocalCommandSet().getShellExecuteCommand(command).execute();
-        Process process = command.execute();
+        Process process = (["bash", "-c", "${command}"]).execute();
 
         final String separator = System.getProperty("line.separator");
         process.waitFor();
-        if(process.exitValue()) {
-            throw new RuntimeException("Process could not be run" + separator + "\tCommand: sh -c "+ command + separator + "\treturn code is: " + process.exitValue())
+        if (process.exitValue()) {
+            throw new RuntimeException("Process could not be run" + separator + "\tCommand: bash -c " + command + separator + "\treturn code is: " + process.exitValue())
         }
 
         def text = process.text
@@ -65,7 +64,7 @@ class ExecutionHelper {
      */
     public static ExtendedProcessExecutionResult executeCommandWithExtendedResult(String command, OutputStream outputStream = null) {
         //Process process = Roddy.getLocalCommandSet().getShellExecuteCommand(command).execute();
-        Process process = command.execute();
+        Process process = ["bash", "-c", command].execute();
 
         //TODO Put to a custom class which can handle things for Windows as well.
         String processID = getProcessID(process)
