@@ -1,5 +1,7 @@
 apply plugin: 'groovy'
 
+group = "de.dkfz.eilslabs"
+
 repositories {
     mavenCentral()
 }
