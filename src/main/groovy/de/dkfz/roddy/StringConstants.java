@@ -33,7 +33,7 @@ public class StringConstants {
     public static final String SPLIT_SBRACKET_LEFT = "\\[";
     public static final String SPLIT_SBRACKET_RIGHT = "\\[";
 
-    public static final String STOP = "";
+    public static final String STOP = ".";
     public static final String COLON = ":";
     public static final String SEMICOLON = ";";
     public static final String COMMA = ",";
