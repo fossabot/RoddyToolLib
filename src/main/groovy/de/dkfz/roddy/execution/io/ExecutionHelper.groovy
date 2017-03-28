@@ -36,6 +36,10 @@ class ExecutionHelper {
             this.processID = processID
             this.lines = lines
         }
+
+        boolean isSuccessful() {
+            return exitValue == 0
+        }
     }
 
     public static String executeSingleCommand(String command) {
