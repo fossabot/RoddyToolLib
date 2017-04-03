@@ -36,8 +36,6 @@ public class ExecutionResult extends ExecutionHelper.ExtendedProcessExecutionRes
      */
     public final String firstLine;
 
-//    public final String processID;
-
     public final int exitCode;
 
     public ExecutionResult(boolean successful, int exitCode, List<String> resultLines, String processID) {
@@ -53,4 +51,12 @@ public class ExecutionResult extends ExecutionHelper.ExtendedProcessExecutionRes
             firstLine = null;
     }
 
+    @Override
+    public boolean isSuccessful() {
+        return exitCode == 0;
+    }
+
+    public boolean getSuccessful() {
+        return isSuccessful();
+    }
 }

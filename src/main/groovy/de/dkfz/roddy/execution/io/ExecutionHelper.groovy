@@ -23,7 +23,7 @@ class ExecutionHelper {
     }
 
     /**
-     * Use ExecutionResult instead
+     * Use ExecutionResult instead. Deprecated and kept for compatibility.
      */
     @Deprecated
     static class ExtendedProcessExecutionResult extends InfoObject {
