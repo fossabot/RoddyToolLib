@@ -15,17 +15,17 @@ import java.util.List;
  * Commands can i.e. be executed via ssh or on the local command line.
  * @author michael
  */
-public class ExecutionResult extends ExecutionHelper.ExtendedProcessExecutionResult {
+public class ExecutionResult extends InfoObject {
+
+    /**
+     * This can hold some sort of process id for a process
+     */
+    public final String processID;
 
     /**
      * Successful or not?
      */
     public final boolean successful;
-    /**
-     * An error number. Normally the return code for shell stuff.
-     */
-    @Deprecated
-    public final int errorNumber;
     /**
      * All result lines.
      */
@@ -39,19 +39,17 @@ public class ExecutionResult extends ExecutionHelper.ExtendedProcessExecutionRes
     public final int exitCode;
 
     public ExecutionResult(boolean successful, int exitCode, List<String> resultLines, String processID) {
-        super(exitCode, processID, resultLines);
+
+        this.processID = processID;
         this.successful = successful;
-        this.errorNumber = exitCode;
         this.exitCode = exitCode;
         this.resultLines = resultLines;
-//        this.processID = processID;
         if(resultLines.size() > 0)
             firstLine = resultLines.get(0);
         else
             firstLine = null;
     }
 
-    @Override
     public boolean isSuccessful() {
         return exitCode == 0;
     }
@@ -59,4 +57,7 @@ public class ExecutionResult extends ExecutionHelper.ExtendedProcessExecutionRes
     public boolean getSuccessful() {
         return isSuccessful();
     }
+
+    @Deprecated
+    public int getErrorNumber() { return exitCode; }
 }
