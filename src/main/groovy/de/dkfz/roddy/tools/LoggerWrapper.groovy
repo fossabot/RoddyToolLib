@@ -31,7 +31,7 @@ public class LoggerWrapper {
     public static final boolean DEFAULT_LOG_EXTENSIVELY = true
     public static final int DEFAULT_MAXIMUM_LOGFILES_PER_PREFIX = 32
 
-    private static File logFile
+    private static File centralLogFile
     private static File applicationLogDirectory = new File(DEFAULT_APPLICATION_LOG_DIRECTORY)
     private static String logFilesPrefix = DEFAULT_LOG_FILES_PREFIX
     private static boolean logExtensively = DEFAULT_LOG_EXTENSIVELY
@@ -101,8 +101,8 @@ public class LoggerWrapper {
      */
     private static void manageLogFileCount() {
         try {
-            File[] files = applicationLogDirectory.listFiles((FilenameFilter) new WildcardFileFilter(logFilesPrefix + "*")).sort() as File[];
-            if (files.length > maximumLogFilesPerPrefix) {
+            File[] files = applicationLogDirectory.listFiles((FilenameFilter) new WildcardFileFilter(logFilesPrefix + "*"))?.sort() as File[];
+            if (files && files.length > maximumLogFilesPerPrefix) {
                 // Remove old files
                 for (int i = 0; i < files.length - maximumLogFilesPerPrefix + 1; i++) {
                     LoggerWrapper.getLogger(LoggerWrapper.class).postSometimesInfo("Deleted old logfile ${files[i]}.")
@@ -113,20 +113,24 @@ public class LoggerWrapper {
         }
     }
 
-    private static synchronized File getLogFile() {
-        if (logFile == null) {
+    static synchronized File getCentralLogFile(boolean invalidate = false) {
+        if (centralLogFile == null || invalidate) {
             String timestamp = InfoObject.formatTimestamp(applicationStartupTimestamp.getTimeStamp())
-            logFile = new File(applicationLogDirectory, [logFilesPrefix, timestamp].join("_") + ".tsv");
+            centralLogFile = new File(applicationLogDirectory, [logFilesPrefix, timestamp].join("_") + ".tsv");
             manageLogFileCount();
         }
 
-        return logFile;
+        return centralLogFile;
+    }
+
+    static synchronized void setCentralLogFile(File file) {
+        centralLogFile = file;
     }
 
     private synchronized void logToLogFile(Level level, String text, Throwable ex) {
         try {
             if (!logExtensively) return;
-            getLogFile() << [this.consoleLogger.getName(), level, text, ex ?: "NoExceptionThrown"].join("\t") << System.getProperty("line.separator");
+            getCentralLogFile() << [this.consoleLogger.getName(), level, text, ex ?: "NoExceptionThrown"].join("\t") << System.getProperty("line.separator");
         } catch (Exception ignored) {
         }
     }
@@ -168,16 +172,28 @@ public class LoggerWrapper {
         log(Level.INFO, text);
     }
 
+    public void rare(String text) {
+        postRareInfo(text)
+    }
+
     public void postRareInfo(String text) {
         logToLogFile(Level.INFO, text, null);
         if (verbosityLevel >= VERBOSITY_RARE)
             consoleLogger.log(Level.INFO, text);
     }
 
+    public void always(String text) {
+        postAlwaysInfo(text)
+    }
+
     public void postAlwaysInfo(String text) {
         logToLogFile(Level.INFO, text, null);
         if (verbosityLevel >= VERBOSITY_ALWAYS)
             consoleLogger.log(Level.INFO, text);
+    }
+
+    public void sometimes(String text) {
+        postSometimesInfo(text)
     }
 
     public void postSometimesInfo(String text) {
@@ -215,6 +231,7 @@ public class LoggerWrapper {
         LoggerWrapper.logFilesPrefix = logFilesPrefix
         LoggerWrapper.logExtensively = logExtensively
         LoggerWrapper.maximumLogFilesPerPrefix = maximumLogFilesPerPrefix
+        getCentralLogFile(true) // Invalidate the central logfile because settings changed.
 
         Logger global = Logger.getLogger("");
         Handler[] handlers = global.getHandlers();

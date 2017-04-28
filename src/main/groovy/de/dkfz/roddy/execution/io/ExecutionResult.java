@@ -18,13 +18,14 @@ import java.util.List;
 public class ExecutionResult extends InfoObject {
 
     /**
+     * This can hold some sort of process id for a process
+     */
+    public final String processID;
+
+    /**
      * Successful or not?
      */
     public final boolean successful;
-    /**
-     * An error number. Normally the return code for shell stuff.
-     */
-    public final int errorNumber;
     /**
      * All result lines.
      */
@@ -35,17 +36,28 @@ public class ExecutionResult extends InfoObject {
      */
     public final String firstLine;
 
-    public final String processID;
+    public final int exitCode;
 
-    public ExecutionResult(boolean successful, int errorNumber, List<String> resultLines, String processID) {
-        this.successful = successful;
-        this.errorNumber = errorNumber;
-        this.resultLines = resultLines;
+    public ExecutionResult(boolean successful, int exitCode, List<String> resultLines, String processID) {
+
         this.processID = processID;
+        this.successful = successful;
+        this.exitCode = exitCode;
+        this.resultLines = resultLines;
         if(resultLines.size() > 0)
             firstLine = resultLines.get(0);
         else
             firstLine = null;
     }
 
+    public boolean isSuccessful() {
+        return exitCode == 0;
+    }
+
+    public boolean getSuccessful() {
+        return isSuccessful();
+    }
+
+    @Deprecated
+    public int getErrorNumber() { return exitCode; }
 }
