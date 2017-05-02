@@ -7,7 +7,7 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 jdk:
-- oraclejdk8
+  - oraclejdk8
 deploy:
   skip_cleanup: true
   provider: releases
@@ -16,6 +16,6 @@ deploy:
   file: build/libs/RoddyToolLib.jar
   on:
     repo: eilslabs/RoddyToolLib
-    branch: develop
+    tags: true
   overwrite: true
   
