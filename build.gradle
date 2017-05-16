@@ -14,7 +14,6 @@ def getVersionName() {
     if (process.waitFor() != 0) {
         throw new RuntimeException("Command failed with code ${process.exitValue()}: '${command.join(" ")}'\nError output: '${output}'")
     } else {
-        System.err.println(output)
         return output.trim()
     }
 }
