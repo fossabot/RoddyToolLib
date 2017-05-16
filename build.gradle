@@ -2,6 +2,23 @@ apply plugin: 'groovy'
 
 group = "de.dkfz.eilslabs"
 
+
+/*
+ * Gets the version name from the current Git tag. If the current commit is not tagged,
+ * this returned string will indicate that. Also if the repository is dirty.
+ */
+def getVersionName() {
+    String[] command = ["/usr/bin/env", "git", "-C", "${project.rootDir}", "describe", "--tags", "--dirty"]
+    def process = new ProcessBuilder(command).redirectErrorStream(true).start()
+    def output = process.inputStream.readLines().join("")
+    if (process.waitFor() != 0) {
+        throw new RuntimeException("Command failed with code ${process.exitValue()}: '${command.join(" ")}'\nError output: '${output}'")
+    } else {
+        System.err.println(output)
+        return output.trim()
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -19,4 +36,11 @@ ext.langLevel = 1.8
 // Fix Gradle version
 task wrapper(type: Wrapper) {
     gradleVersion = '3.3'
+}
+
+jar {
+    version = getVersionName()
+    manifest {
+        attributes("Implementation-Version": version)
+    }
 }
