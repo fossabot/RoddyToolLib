@@ -13,10 +13,6 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.Path
-
 /**
  * Test class to cover RoddyIOHelperMethods.
  *
@@ -93,7 +89,7 @@ public class RoddyIOHelperMethodsTest {
         aList += getMD5OfFilesInDirectories(md5TestBaseDir, md5TestSubDir, ["E", "F"]);
 
         String text = aList.join(System.getProperty("line.separator"))
-        def md5OfFirstTestDirectory = RoddyIOHelperMethods.getSingleMD5OfFilesInDirectory(md5TestDir)
+        def md5OfFirstTestDirectory = RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(md5TestDir)
         assert md5OfFirstTestDirectory == RoddyIOHelperMethods.getMD5OfText(text);
 
         // Replicate the test but move one file!
@@ -104,7 +100,7 @@ public class RoddyIOHelperMethodsTest {
         new File(md5TestSubDir2, "E") << "E"
         new File(md5TestSubDir2, "G") << "F"
 
-        assert md5OfFirstTestDirectory != RoddyIOHelperMethods.getSingleMD5OfFilesInDirectory(md5TestDir2)
+        assert md5OfFirstTestDirectory != RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(md5TestDir2)
 
         // Replicate the test but don't move one file!
         File md5TestDir3 = RoddyIOHelperMethods.assembleLocalPath(testBaseDir, "testGetSingleMD5OfFilesInDirectory_c", "md5sumtest");
@@ -114,7 +110,7 @@ public class RoddyIOHelperMethodsTest {
         new File(md5TestSubDir3, "E") << "E"
         new File(md5TestSubDir3, "F") << "F"
 
-        assert md5OfFirstTestDirectory == RoddyIOHelperMethods.getSingleMD5OfFilesInDirectory(md5TestDir3)
+        assert md5OfFirstTestDirectory == RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(md5TestDir3)
     }
 
     @Test
