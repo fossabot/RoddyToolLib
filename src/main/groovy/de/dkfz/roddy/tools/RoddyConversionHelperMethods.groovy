@@ -5,6 +5,13 @@
  */
 
 package de.dkfz.roddy.tools
+
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
+import groovy.util.slurpersupport.NodeChild
+import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.XmlUtil
+
 /**
  * Contains methods to convert numbers
  *
@@ -69,5 +76,10 @@ class RoddyConversionHelperMethods {
 
     public static boolean isDefinedArray(String value) {
         return !isNullOrEmpty(value) && ([value[0], value[-1]] == ["(", ")"]); // What else to test??
+    }
+
+    @CompileStatic(TypeCheckingMode.SKIP)
+    static String toFormattedXML(NodeChild nc, String separator = "\n") {
+        return XmlUtil.serialize(new StreamingMarkupBuilder().bind { it -> it.faulty nc }.toString()).readLines()[1 .. -2].join(separator)
     }
 }
