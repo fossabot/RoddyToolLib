@@ -175,6 +175,7 @@ class RoddyIOHelperMethods {
     static void copyDirectory(File source, File target, CopyOption... options = [StandardCopyOption.COPY_ATTRIBUTES]) {
         copyDirectory(source.toPath(), target.toPath(), options)
     }
+
     static void copyDirectory(Path source, Path target, CopyOption... options = [StandardCopyOption.COPY_ATTRIBUTES]) {
         try {
             Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
@@ -224,6 +225,10 @@ class RoddyIOHelperMethods {
             logger.info("No stacktrace could be printed for an exception.")
             return "";
         }
+    }
+
+    public static String join(String separator = "\n", String... entries) {
+        return joinArray(entries as String[], separator)
     }
 
     public static String joinArray(Object[] array, String separator) {
@@ -367,7 +372,7 @@ class RoddyIOHelperMethods {
      * @return
      */
     public static ArrayList<String> splitPathname(String pathname) {
-        pathname.split(StringConstants.SPLIT_SLASH).findAll({it != ""}) as ArrayList<String>
+        pathname.split(StringConstants.SPLIT_SLASH).findAll({ it != "" }) as ArrayList<String>
     }
 
     public static Optional<Integer> findComponentIndexInPath(String path, String component) {
@@ -384,9 +389,9 @@ class RoddyIOHelperMethods {
      *  pattern and the path. If there is a mismatch, a RuntimeException is raised. Only the first match
      *  is considered. Later path components may diverge.
      *
-     * @param pattern    Path pattern, e.g. /path/to/${variable}/to/be/matched
-     * @param variable   Variable to be matched, e.g. pid. ${variable} will be searched for in pattern.
-     * @param path       Path containing the value. The path value that is matched in here will be returned
+     * @param pattern Path pattern, e.g. /path/to/${variable}/to/be/matched
+     * @param variable Variable to be matched, e.g. pid. ${variable} will be searched for in pattern.
+     * @param path Path containing the value. The path value that is matched in here will be returned
      * @return
      */
     public static Optional<String> getPatternVariableFromPath(String pattern, String variable, String path) {
