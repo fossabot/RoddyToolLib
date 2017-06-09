@@ -123,6 +123,6 @@ class RoddyConversionHelperMethodsTest extends GroovyTestCase {
     }
 
     void testToFormattedXML() {
-        assert RoddyConversionHelperMethods.toFormattedXML(buildNodeChild()) == "<test>\n<a/></test>"
+        assert RoddyConversionHelperMethods.toFormattedXML(buildNodeChild()) == "  <test>\n    <a/>\n  </test>"
     }
 }

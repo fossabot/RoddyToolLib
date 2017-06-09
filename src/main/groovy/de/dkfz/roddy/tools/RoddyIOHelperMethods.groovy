@@ -69,14 +69,21 @@ class RoddyIOHelperMethods {
 
         @Override
         void compressFile(File from, File to, File workingDirectory = null) {
-            compressDirectory(from, to, workingDirectory);
+            try {
+                compressDirectory(from, to, workingDirectory);
+            } catch (Exception ex) {
+                throw new IOException("Could not zip file ${from} to zip archive ${to}", ex)
+            }
         }
 
         @Override
         void compressDirectory(File from, File to, File workingDirectory = null) {
 
-            String result = ExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
-//            println(result);
+            try {
+                String result = ExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
+            } catch (Exception ex) {
+                throw new IOException("Could not zip folder ${from} to zip archive ${to}", ex)
+            }
         }
 
         @Override
