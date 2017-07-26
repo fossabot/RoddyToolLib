@@ -10,6 +10,7 @@ import de.dkfz.roddy.tools.RoddyIOHelperMethods
 import groovy.transform.CompileStatic
 import org.junit.AfterClass
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
@@ -166,7 +167,7 @@ public class RoddyIOHelperMethodsTest {
         assert !exbnw3.canWrite()
 
     }
-
+    
     @Test
     public void testSymbolicToNumericAccessRights() throws Exception {
 

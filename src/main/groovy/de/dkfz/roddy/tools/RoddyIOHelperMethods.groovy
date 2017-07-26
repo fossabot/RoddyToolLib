@@ -332,7 +332,7 @@ class RoddyIOHelperMethods {
 
     private static final String calculateUMaskFromStringWithBash(String rightsStr, int defaultUserMask) {
         def defaultRights = numericToHashAccessRights(defaultUserMask)
-        return ExecutionHelper.executeSingleCommand("umask ${defaultRights}; umask ${rightsStr}; umask");
+        return ExecutionHelper.executeSingleCommand("umask ${defaultRights.values().join("")} && umask ${rightsStr} && umask");
     }
 
     public static final String convertUMaskToAccessRights(String umask) {
@@ -365,7 +365,7 @@ class RoddyIOHelperMethods {
 
     }
 
-    public static Map<String, Integer> numericToHashAccessRights(int rights) {
+    public static LinkedHashMap<String, Integer> numericToHashAccessRights(int rights) {
         assert rights <= 07777  // including suid, sgid, sticky bits.
         return [u: (rights & 0700) >> 6,
                 g: (rights & 0070) >> 3,
