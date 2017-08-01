@@ -10,10 +10,16 @@ import de.dkfz.roddy.StringConstants
 import de.dkfz.roddy.execution.io.ExecutionHelper
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.FileUtils
 
 import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributeView
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFileAttributeView
+import java.nio.file.attribute.PosixFileAttributes
+import java.nio.file.attribute.PosixFilePermissions
+
+import static java.nio.file.attribute.PosixFileAttributeView.*
+import static java.nio.file.attribute.PosixFileAttributeView.*
 
 /**
  * Contains methods which print out text on the console, like listworkflows.
@@ -256,10 +262,20 @@ class RoddyIOHelperMethods {
 
     public static String getMD5OfFile(File f) {
         try {
-            DigestUtils.md5Hex(new FileInputStream(f));
+            return DigestUtils.md5Hex(new FileInputStream(f));
         } catch (Exception ex) {
             logger.warning("Could not md5 file ${f.absolutePath} " + ex.toString());
             return "";
+        }
+    }
+
+    public static String getMD5OfPermissions(File f) {
+        try {
+            PosixFileAttributeView view = Files.getFileAttributeView(f.toPath(), PosixFileAttributeView.class) as PosixFileAttributeView
+            return DigestUtils.md5Hex(PosixFilePermissions.toString(view.readAttributes().permissions()))
+        } catch (Exception ex) {
+            logger.warning("Could not md5 permissions string for file ${f.absolutePath}" + ex.toString())
+            return ""
         }
     }
 
@@ -289,7 +305,7 @@ class RoddyIOHelperMethods {
 
     @Deprecated
     static String getSingleMD5OfFiles(File baseDirectory) {
-        return getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(baseDirectory)
+        return getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(baseDirectory)
     }
 
     /**
@@ -298,7 +314,7 @@ class RoddyIOHelperMethods {
      * @param baseDirectory
      * @return
      */
-    static String getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(File baseDirectory) {
+    static String getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(File baseDirectory) {
         List<File> list = []
         List<String> md5s = []
         baseDirectory.eachFileRecurse(FileType.FILES) { File aFile -> list << aFile }
@@ -307,7 +323,8 @@ class RoddyIOHelperMethods {
             File file ->
                 String md5OfDir = getMD5OfText(baseDirectory.name + file.absolutePath - baseDirectory.absolutePath)
                 String md5OfFile = getMD5OfFile(file)
-                md5s << md5OfDir + md5OfFile
+                String md5OfPermissions = getMD5OfPermissions(file)
+                md5s << md5OfDir + md5OfFile + md5OfPermissions
         }
         return getMD5OfText(md5s.join(System.getProperty("line.separator")));
     }

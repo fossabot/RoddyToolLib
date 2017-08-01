@@ -10,7 +10,6 @@ import de.dkfz.roddy.tools.RoddyIOHelperMethods
 import groovy.transform.CompileStatic
 import org.junit.AfterClass
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
@@ -64,7 +63,7 @@ public class RoddyIOHelperMethodsTest {
         return filenames.collect {
             File f = new File(md5TestDir, it)
             f << it
-            return RoddyIOHelperMethods.getMD5OfText("${md5TestDirShort}/${it}") + RoddyIOHelperMethods.getMD5OfFile(f)
+            return RoddyIOHelperMethods.getMD5OfText("${md5TestDirShort}/${it}") + RoddyIOHelperMethods.getMD5OfFile(f) + RoddyIOHelperMethods.getMD5OfPermissions(f)
         }
     }
 
@@ -90,7 +89,7 @@ public class RoddyIOHelperMethodsTest {
         aList += getMD5OfFilesInDirectories(md5TestBaseDir, md5TestSubDir, ["E", "F"]);
 
         String text = aList.join(System.getProperty("line.separator"))
-        def md5OfFirstTestDirectory = RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(md5TestDir)
+        def md5OfFirstTestDirectory = RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(md5TestDir)
         assert md5OfFirstTestDirectory == RoddyIOHelperMethods.getMD5OfText(text);
 
         // Replicate the test but move one file!
@@ -101,7 +100,7 @@ public class RoddyIOHelperMethodsTest {
         new File(md5TestSubDir2, "E") << "E"
         new File(md5TestSubDir2, "G") << "F"
 
-        assert md5OfFirstTestDirectory != RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(md5TestDir2)
+        assert md5OfFirstTestDirectory != RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(md5TestDir2)
 
         // Replicate the test but don't move one file!
         File md5TestDir3 = RoddyIOHelperMethods.assembleLocalPath(testBaseDir, "testGetSingleMD5OfFilesInDirectory_c", "md5sumtest");
@@ -111,7 +110,7 @@ public class RoddyIOHelperMethodsTest {
         new File(md5TestSubDir3, "E") << "E"
         new File(md5TestSubDir3, "F") << "F"
 
-        assert md5OfFirstTestDirectory == RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNames(md5TestDir3)
+        assert md5OfFirstTestDirectory == RoddyIOHelperMethods.getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(md5TestDir3)
     }
 
     @Test
@@ -167,7 +166,7 @@ public class RoddyIOHelperMethodsTest {
         assert !exbnw3.canWrite()
 
     }
-    
+
     @Test
     public void testSymbolicToNumericAccessRights() throws Exception {
 
