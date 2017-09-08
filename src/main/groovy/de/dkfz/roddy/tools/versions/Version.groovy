@@ -1,26 +1,76 @@
+/*
+ * Copyright (c) 2016 eilslabs.
+ *
+ * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
+ */
+
 package de.dkfz.roddy.tools.versions
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 
 import java.text.ParseException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class VersionInterval {
+@CompileStatic
+class VersionInterval implements Comparable<VersionInterval> {
     final Version from
     final Version to
 
-    def contains(Version query) {
-        return query >= from && query <= to
+    VersionInterval(Version from, Version to) {
+        if (from <= to) {
+            this.from = from
+            this.to = to
+        } else {
+            this.to = from
+            this.from = to
+        }
+    }
+
+    boolean contains(final Version query, Version.VersionLevel level = Version.defaultCompatibilityLevel) {
+        return this.from.compareTo(query, level) <= 0 &&
+                this.to.compareTo(query, level) >= 0
+    }
+
+    boolean overlaps(VersionInterval other, Version.VersionLevel level = Version.defaultCompatibilityLevel) {
+        /** Relations can be partial overlap, containment of one in the other and disjunction. */
+        return this.contains(other.from, level) || this.contains(other.to, level) ||
+                other.contains(this.from, level) || other.contains(this.to, level)
+    }
+
+    /** Lexicographic ordering of VersionIntervals. */
+    @Override
+    int compareTo(VersionInterval o) {
+        return compareTo(o, Version.defaultCompatibilityLevel)
+    }
+    int compareTo(VersionInterval other, Version.VersionLevel level) {
+        return this.from.compareTo(other.from, level) ?: this.to.compareTo(other.to, level)
+    }
+
+    /** Attempt to merge two interval, if they overlap. Otherwise return Optional.empty(). */
+    Optional<VersionInterval> merge(VersionInterval other, Version.VersionLevel level = Version.defaultCompatibilityLevel) {
+        if (this.overlaps(other, level)) {
+            return Optional.of(new VersionInterval([this.from, other.from].min(), [this.to, other.to].max()))
+        } else {
+            return Optional.empty()
+        }
+    }
+
+    @Override
+    String toString() {
+        "[${this.from}, ${this.to}]"
     }
 }
 
-
+/**
+ * Version class for semantic versioning.
+ */
 @CompileStatic
 class Version implements Comparable<Version> {
 
-    enum VersionLevel {
+    static enum VersionLevel {
         MAJOR,
         MINOR,
         PATCH,
@@ -37,7 +87,7 @@ class Version implements Comparable<Version> {
                 case 3:
                     return REVISION;
                 default:
-                    throw new RuntimeException("Cannot interpret integer ${x} as VersionLevel")
+                    throw new NumberFormatException("Cannot interpret integer ${x} as VersionLevel")
             }
             return null;
         }
@@ -59,7 +109,8 @@ class Version implements Comparable<Version> {
     final Integer patch
     final Integer revision
 
-    public File buildVersionFile = null
+    /** Global default compatibility level. */
+    static final VersionLevel defaultCompatibilityLevel = VersionLevel.PATCH
 
     Version (Integer major, Integer minor, Integer patch, Integer revision = 0) {
         this.major = major
@@ -92,40 +143,56 @@ class Version implements Comparable<Version> {
 
     static Version fromString (String versionString) {
         Matcher matcher = versionPattern.matcher(versionString)
-        if (matcher.find()) {
-            return new Version (
-                    matcher.group(1).toInteger(),
-                    matcher.group(2).toInteger(),
-                    matcher.group(3).toInteger(),
-                    matcher.group(5).toInteger(),
-            )
+        if (matcher.matches()) {
+            if (null != matcher.group(5)) {
+                return new Version(
+                        matcher.group(1).toInteger(),
+                        matcher.group(2).toInteger(),
+                        matcher.group(3).toInteger(),
+                        matcher.group(5).toInteger(), // the inner group of "(-(\d))+"
+                )
+            } else {
+                return new Version(
+                        matcher.group(1).toInteger(),
+                        matcher.group(2).toInteger(),
+                        matcher.group(3).toInteger(),
+                        0
+                )
+            }
         } else {
             throw new ParseException("Could not parse version string '${versionString}'", 0)
         }
     }
 
 
-    @CompileDynamic
-    Integer getAt (int level) {
-        return getAt(VersionLevel.fromInteger(level))
-    }
-
+    /** The indexed access allows selecting the version level of the version. Additionally, getAt() allows a
+     *  destructuring bind of the form `def (major, minor, patch, revision) = version`.
+     *
+     * @param level    VersionLevel to be returned.
+     * @return
+     */
     @CompileDynamic
     Integer getAt (VersionLevel level) {
         if (level == VersionLevel.MAJOR) major
         else if (level == VersionLevel.MINOR) minor
         else if (level == VersionLevel.PATCH) patch
         else if (level == VersionLevel.REVISION) revision
-        else throw new IndexOutOfBoundsException("1.2.3-4")
+        else throw new IndexOutOfBoundsException("Use 1-based indices: 1.2.3-4")
+    }
+
+    /** Convenience method. */
+    @CompileDynamic
+    Integer getAt (int level) {
+        return getAt(VersionLevel.fromInteger(level))
     }
 
     Boolean equals (Version other) {
-        return this.compareTo(other) == 0
+        return this.compareTo(other, VersionLevel.REVISION) == 0
     }
 
     @Override
     int compareTo(Version o) {
-        return compareTo(o, VersionLevel.REVISION)
+        return compareTo(o, defaultCompatibilityLevel)
     }
 
     /** A more generic version of comparison function that allows to compare up to a specific version level. */
@@ -138,28 +205,47 @@ class Version implements Comparable<Version> {
         return 0
     }
 
-
     /** If two versions are compatible, then all intermediate versions are also compatible. Compatibility generates an
      *  equivalence class of versions (reflexive, symmetric, transitive). */
 
-    /** Two versions are compatible, if they have they only differ in the revision, or if the versions are explicitly
+    /** Two versions are compatible, if they only differ in the revision, or if the versions are explicitly
      *  marked as being compatible. The explicit marking of revisions as compatible can be done with the
      *  compatibilities parameter. If there is any interval that contains both versions (this and the other) then
      *  the two versions are compatible. Also these checks are up to the VersionLevel.REVISION.
      *
      */
-    boolean compatibleTo(Version other, Collection<VersionInterval> compatibilities) {
-        Boolean samePatch = this.compareTo(other, VersionLevel.PATCH) == 0
+
+    /** This is used to ensure transitivity of compatibility */
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private Collection<VersionInterval> mergeOverlappingIntervals(final Collection<VersionInterval> intervals, VersionLevel level = defaultCompatibilityLevel) {
+        return intervals.toSorted().inject(new LinkedList<VersionInterval>()) { List<VersionInterval> result, VersionInterval next ->
+            if (result.isEmpty()) {
+                [next]
+            } else {
+                def merged = result.first().merge(next, level)
+                if (merged.isPresent()) {
+                    result.drop(1)
+                    result.add(0, merged.get())
+                } else {
+                    result.add(0, next)
+                }
+                result
+            }
+        }
+    }
+
+    boolean compatibleTo(final Version other, final Collection<VersionInterval> compatibilities, VersionLevel level = defaultCompatibilityLevel) {
+        def mergeCompatibilities = mergeOverlappingIntervals(compatibilities, level)
+        Boolean samePatch = this.compareTo(other, level) == 0
         if (samePatch) {
             return true
         } else {
-            VersionInterval sharedInterval = compatibilities.find { interval ->
-                interval.contains(this) && interval.contains(other)
+            VersionInterval sharedInterval = mergeCompatibilities.find { interval ->
+                interval.contains(this, level) && interval.contains(other, level)
             }
             return null != sharedInterval
         }
     }
-
 
 
 }
