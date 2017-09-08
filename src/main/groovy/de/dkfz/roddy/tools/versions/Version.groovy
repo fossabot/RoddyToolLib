@@ -14,6 +14,11 @@ import java.text.ParseException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+/**
+ * VersionInterval allow to check whether a Version is within the interval. To simplify the implementation of
+ * version compatibility given a set of compatibility intervals as equivalence class (in particular with respect
+ * to transitivity) version interval are Comparable and can be merged (when overlapping).
+ */
 @CompileStatic
 class VersionInterval implements Comparable<VersionInterval> {
     final Version from
@@ -65,7 +70,12 @@ class VersionInterval implements Comparable<VersionInterval> {
 }
 
 /**
- * Version class for semantic versioning.
+ * Version class for semantic versioning. In particular a disciplined way of increasing versions at different semantic
+ * versioning levels is supported as well as a compatibility relation as equivalence relation and tolerating differences
+ * at any chosen version level. By default revision-level difference of otherwise identical versions are considered
+ * compatible.
+ *
+ * Version is comparable to allow "versionA < versionB" expressions.
  */
 @CompileStatic
 class Version implements Comparable<Version> {
@@ -92,7 +102,9 @@ class Version implements Comparable<Version> {
             return null;
         }
 
-        // Taken from https://kousenit.org/2008/03/19/turning-java-enums-into-groovy-ranges
+        /** With the next() and previous() methods VersionLevel can be used in Groovy range expression alla
+         *  PATCH..REVISION. Taken from https://kousenit.org/2008/03/19/turning-java-enums-into-groovy-ranges
+         */
         VersionLevel next() {
             VersionLevel[] vals = VersionLevel.values()
             return vals[(this.ordinal() + 1) % vals.length]
@@ -186,16 +198,24 @@ class Version implements Comparable<Version> {
         return getAt(VersionLevel.fromInteger(level))
     }
 
+    /** Note: These equals and compareTo are too important to mess around with compatibility levels. Therefore, for
+     *        these methods the most exact comparison is done. E.g. when compatibility intervals are to be sorted
+     *        this needs to be done exactly.
+     *
+     * @param other
+     * @return exact semantic equality of Versions
+     */
     Boolean equals (Version other) {
         return this.compareTo(other, VersionLevel.REVISION) == 0
     }
 
     @Override
     int compareTo(Version o) {
-        return compareTo(o, defaultCompatibilityLevel)
+        return compareTo(o, VersionLevel.REVISION)
     }
 
-    /** A more generic version of comparison function that allows to compare up to a specific version level. */
+    /** A more generic version of comparison function that allows to compare up to a specific version level. This is
+     *  used to determine compatibility. */
     int compareTo(Version o, VersionLevel level) {
         for (l in VersionLevel.MAJOR..level) {
             int result = this[l].compareTo(o[l])
@@ -205,14 +225,19 @@ class Version implements Comparable<Version> {
         return 0
     }
 
-    /** If two versions are compatible, then all intermediate versions are also compatible. Compatibility generates an
-     *  equivalence class of versions (reflexive, symmetric, transitive). */
-
-    /** Two versions are compatible, if they only differ in the revision, or if the versions are explicitly
-     *  marked as being compatible. The explicit marking of revisions as compatible can be done with the
-     *  compatibilities parameter. If there is any interval that contains both versions (this and the other) then
-     *  the two versions are compatible. Also these checks are up to the VersionLevel.REVISION.
+    /** The compatibility-level is the lowest VersionLevel (order as in the VersionLevel enum; with MAJOR first (low)
+     *  and REVISION last (high)) two compared versions need to be identical in, to be considered compatible.
      *
+     *  By default, two versions are compatible, if they only differ in the REVISION. The default compatibility-level
+     *  is therefore VersionLevel.PATCH. For instance, by default the versions 1.1.1-0 and 1.1.1-1 are considered
+     *  compatible, but 1.1.2-0 is not compatible to the first two. If the compatibility level for the comparisons is
+     *  set to null, then all versions are compatible.
+     *
+     *  The second way to declare compatibility is by explicitly declaring compatibility intervals. If there is any
+     *  interval that contains both versions (this and the other) then the two versions are compatible. Also these
+     *  checks account for implicit compatibility defined by the compatibility level. Note that, if two versions are
+     *  compatible then all intermediate versions are also compatible. Therefore, compatibility generates an equivalence
+     *  relation on versions (reflexive, symmetric, transitive).
      */
 
     /** This is used to ensure transitivity of compatibility */
@@ -234,10 +259,21 @@ class Version implements Comparable<Version> {
         }
     }
 
+    /**
+     *
+     * @param other
+     * @param compatibilities   List of compatibility intervals. Will be curated into equivalence classes.
+     * @param level             Compatibility level used for implicit compatibilities. By default REVISIONs are
+     *                          compatible. A value of "null" serves to let all versions be compatible.
+     * @return
+     */
     boolean compatibleTo(final Version other, final Collection<VersionInterval> compatibilities, VersionLevel level = defaultCompatibilityLevel) {
+        if (null == level) {
+            return true
+        }
         def mergeCompatibilities = mergeOverlappingIntervals(compatibilities, level)
-        Boolean samePatch = this.compareTo(other, level) == 0
-        if (samePatch) {
+        Boolean sameCompatibilityLevel = this.compareTo(other, level) == 0
+        if (sameCompatibilityLevel) {
             return true
         } else {
             VersionInterval sharedInterval = mergeCompatibilities.find { interval ->
