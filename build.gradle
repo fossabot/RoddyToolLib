@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2017 eilslabs.
+ *
+ * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
+ */
+
+plugins {
+    id 'org.ajoberstar.grgit' version '1.7.2'
+}
+
 apply plugin: 'groovy'
 
 group = "de.dkfz.eilslabs"
@@ -8,14 +18,8 @@ group = "de.dkfz.eilslabs"
  * this returned string will indicate that. Also if the repository is dirty.
  */
 def getVersionName() {
-    String[] command = ["/usr/bin/env", "git", "-C", "${project.rootDir}", "describe", "--tags", "--dirty"]
-    def process = new ProcessBuilder(command).redirectErrorStream(true).start()
-    def output = process.inputStream.readLines().join("")
-    if (process.waitFor() != 0) {
-        throw new RuntimeException("Command failed with code ${process.exitValue()}: '${command.join(" ")}'\nError output: '${output}'")
-    } else {
-        return output.trim()
-    }
+    def dirtySuffix = grgit.status().isClean() ? '' : '-dirty'
+    return grgit.describe() + dirtySuffix
 }
 
 repositories {
