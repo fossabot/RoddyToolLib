@@ -7,19 +7,14 @@
 package de.dkfz.roddy.tools
 
 import de.dkfz.roddy.StringConstants
-import de.dkfz.roddy.execution.io.ExecutionHelper
+import de.dkfz.roddy.execution.io.LocalExecutionHelper
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 
 import java.nio.file.*
-import java.nio.file.attribute.BasicFileAttributeView
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFileAttributeView
-import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermissions
-
-import static java.nio.file.attribute.PosixFileAttributeView.*
-import static java.nio.file.attribute.PosixFileAttributeView.*
 
 /**
  * Contains methods which print out text on the console, like listworkflows.
@@ -86,7 +81,7 @@ class RoddyIOHelperMethods {
         void compressDirectory(File from, File to, File workingDirectory = null) {
 
             try {
-                String result = ExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
+                String result = LocalExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
             } catch (Exception ex) {
                 throw new IOException("Could not zip folder ${from} to zip archive ${to}", ex)
             }
@@ -94,7 +89,7 @@ class RoddyIOHelperMethods {
 
         @Override
         void decompress(File from, File to, File workingDirectory = null) {
-            String result = ExecutionHelper.executeSingleCommand(getDecompressionString(from, to, workingDirectory));
+            String result = LocalExecutionHelper.executeSingleCommand(getDecompressionString(from, to, workingDirectory));
 //            println(result);
         }
 
@@ -349,7 +344,7 @@ class RoddyIOHelperMethods {
 
     private static final String calculateUMaskFromStringWithBash(String rightsStr, int defaultUserMask) {
         def defaultRights = numericToHashAccessRights(defaultUserMask)
-        return ExecutionHelper.executeSingleCommand("umask ${defaultRights.values().join("")} && umask ${rightsStr} && umask");
+        return LocalExecutionHelper.executeSingleCommand("umask ${defaultRights.values().join("")} && umask ${rightsStr} && umask");
     }
 
     public static final String convertUMaskToAccessRights(String umask) {
