@@ -12,8 +12,8 @@ import de.dkfz.roddy.tools.LoggerWrapper
 import java.lang.reflect.Field
 
 @groovy.transform.CompileStatic
-class ExecutionHelper {
-    private static final LoggerWrapper logger = LoggerWrapper.getLogger(ExecutionHelper.class.name);
+class LocalExecutionHelper {
+    private static final LoggerWrapper logger = LoggerWrapper.getLogger(LocalExecutionHelper.class.name);
 
     public static String getProcessID(Process process) {
         Field f = process.getClass().getDeclaredField("pid");
