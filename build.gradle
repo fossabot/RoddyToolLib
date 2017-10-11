@@ -10,7 +10,7 @@ plugins {
 
 apply plugin: 'groovy'
 
-group = "de.dkfz.eilslabs"
+group = "com.github.eilslabs"
 
 
 /*
@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+    compile 'org.codehaus.groovy:groovy-all:2.4.9'
     testCompile 'junit:junit:4.12'
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
