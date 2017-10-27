@@ -39,7 +39,7 @@ ext.langLevel = 1.8
 
 // Fix Gradle version
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '4.2.1'
 }
 
 jar {
