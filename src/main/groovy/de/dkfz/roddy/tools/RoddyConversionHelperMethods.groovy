@@ -80,6 +80,11 @@ class RoddyConversionHelperMethods {
 
     @CompileStatic(TypeCheckingMode.SKIP)
     static String toFormattedXML(NodeChild nc, String separator = "\n") {
-        return XmlUtil.serialize(new StreamingMarkupBuilder().bind { it -> it.faulty nc }.toString()).readLines()[1 .. -2].join(separator)
+        List<String> resultList = XmlUtil.serialize(new StreamingMarkupBuilder().bind { it -> it.faulty nc }.toString()).readLines()
+        if (resultList.size() >= 2)
+            return resultList[1 .. -2].join(separator)
+        else
+            return ""
+
     }
 }
