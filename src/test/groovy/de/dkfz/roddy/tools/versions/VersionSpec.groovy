@@ -152,4 +152,15 @@ class VersionSpec extends Specification {
 
     }
 
+    def "version-level toString"() {
+        when:
+        def version = new Version(1,2,3,4)
+        then:
+        version.toString() == "1.2.3-4"
+        version.toString(Version.VersionLevel.REVISION) == "1.2.3-4"
+        version.toString(Version.VersionLevel.PATCH) == "1.2.3"
+        version.toString(Version.VersionLevel.MINOR) == "1.2"
+        version.toString(Version.VersionLevel.MAJOR) == "1"
+    }
+
 }

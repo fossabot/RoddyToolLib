@@ -151,6 +151,20 @@ class Version implements Comparable<Version> {
         return "${major}.${minor}.${patch}-${revision}"
     }
 
+    String toString(VersionLevel level) {
+        def builder = new StringBuilder()
+        builder << getAt(VersionLevel.MAJOR)
+        if (level != VersionLevel.MAJOR) {
+            for (l in VersionLevel.MINOR..level) {
+                if (l != VersionLevel.REVISION)
+                    builder << '.' + getAt(l)
+                else
+                    builder << '-' + getAt(l)
+            }
+        }
+        return builder.toString()
+    }
+
     private static final Pattern versionPattern = Pattern.compile(/^(\d+)\.(\d+)\.(\d+)(-(\d+))?$/)
 
     static Version fromString (String versionString) {
