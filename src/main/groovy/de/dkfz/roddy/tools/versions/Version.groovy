@@ -151,6 +151,19 @@ class Version implements Comparable<Version> {
         return "${major}.${minor}.${patch}-${revision}"
     }
 
+    String toString(VersionLevel level) {
+        String result = getAt(VersionLevel.MAJOR)
+        if (level != VersionLevel.MAJOR) {
+            for (l in VersionLevel.MINOR..level) {
+                if (l != VersionLevel.REVISION)
+                    result += '.' + getAt(l)
+                else
+                    result += '-' + getAt(l)
+            }
+        }
+        return result
+    }
+
     private static final Pattern versionPattern = Pattern.compile(/^(\d+)\.(\d+)\.(\d+)(-(\d+))?$/)
 
     static Version fromString (String versionString) {
