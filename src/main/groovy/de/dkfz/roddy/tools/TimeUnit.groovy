@@ -8,6 +8,8 @@ package de.dkfz.roddy.tools
 
 import de.dkfz.roddy.StringConstants
 
+import java.time.Duration
+
 /**
  * A class which accepts a String and tries to convert it to a time unit like
  * HHHH:MM, e.g. 180h == 180:00, 4m == 00:04
@@ -134,6 +136,15 @@ class TimeUnit {
             // Always append the seconds!
             timeString = listOfCorrectedValues.join(":")
         }
+    }
+
+    static TimeUnit fromDuration(Duration duration) {
+        return new TimeUnit(duration.getSeconds()+"s")
+    }
+
+    Duration asDuration() {
+        String[] s = timeString.toString().split(":")
+        return Duration.ofDays(Long.parseLong(s[0])).plusHours(Long.parseLong(s[1])).plusMinutes(Long.parseLong(s[2])).plusSeconds(Long.parseLong(s[3]))
     }
 
     @Override
