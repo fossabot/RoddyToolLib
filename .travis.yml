@@ -17,6 +17,7 @@ deploy:
   file_glob: true
   on:
     repo: eilslabs/RoddyToolLib
+    branch: master
     tags: true
   overwrite: true
   
