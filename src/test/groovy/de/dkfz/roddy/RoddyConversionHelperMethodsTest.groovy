@@ -7,7 +7,6 @@
 package de.dkfz.roddy.tools.conversion
 
 import de.dkfz.roddy.tools.RoddyConversionHelperMethods
-import de.dkfz.roddy.tools.RoddyIOHelperMethods
 import groovy.transform.CompileStatic
 import groovy.util.slurpersupport.NodeChild
 
