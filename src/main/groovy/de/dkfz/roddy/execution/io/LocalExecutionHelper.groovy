@@ -6,13 +6,14 @@
 
 package de.dkfz.roddy.execution.io
 
+import de.dkfz.roddy.core.InfoObject
 import de.dkfz.roddy.tools.LoggerWrapper
 
 import java.lang.reflect.Field
 
 @groovy.transform.CompileStatic
-class ExecutionHelper {
-    private static final LoggerWrapper logger = LoggerWrapper.getLogger(ExecutionHelper.class.name);
+class LocalExecutionHelper {
+    private static final LoggerWrapper logger = LoggerWrapper.getLogger(LocalExecutionHelper.class.name);
 
     public static String getProcessID(Process process) {
         Field f = process.getClass().getDeclaredField("pid");
@@ -21,15 +22,23 @@ class ExecutionHelper {
         return processID
     }
 
-    static class ExtendedProcessExecutionResult {
-        int exitValue;
-        String processID;
-        List<String> lines = [];
+    /**
+     * Use ExecutionResult instead. Deprecated and kept for compatibility.
+     */
+    @Deprecated
+    static class ExtendedProcessExecutionResult extends InfoObject {
+        final int exitValue;
+        final String processID;
+        final List<String> lines = [];
 
         ExtendedProcessExecutionResult(int exitValue, String processID, List<String> lines) {
             this.exitValue = exitValue
             this.processID = processID
             this.lines = lines
+        }
+
+        boolean isSuccessful() {
+            return exitValue == 0
         }
     }
 
@@ -62,7 +71,7 @@ class ExecutionHelper {
      * @param outputStream
      * @return
      */
-    public static ExtendedProcessExecutionResult executeCommandWithExtendedResult(String command, OutputStream outputStream = null) {
+    public static ExecutionResult executeCommandWithExtendedResult(String command, OutputStream outputStream = null) {
         //Process process = Roddy.getLocalCommandSet().getShellExecuteCommand(command).execute();
         Process process = ["bash", "-c", command].execute();
 
@@ -80,7 +89,7 @@ class ExecutionHelper {
             process.waitForProcessOutput(sstream, sstream);
             lines = sstream.readLines().collect { String l -> return l.toString(); };
         }
-        return new ExtendedProcessExecutionResult(process.exitValue(), processID, lines);
+        return new ExecutionResult(process.exitValue() == 0, process.exitValue(), lines, processID);
     }
 
     public static Process executeNonBlocking(String command) {

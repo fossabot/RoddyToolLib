@@ -1,10 +1,23 @@
 language: groovy
 sudo: required
 before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
 jdk:
   - oraclejdk8
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: W08AAlhsqzhOQyrvhAr757gMfnMbN1yFZmPW0TmZ2YTqSPj72tP65RH1bSkgVP+OJt6mhqEI+VdpwlW/O706BBG5bWZo0z1TV0ExZxyzamhOaVouW97/bnVPAyM716otLGkC+EqOfsvm5IL7D+oiscd/xZslkkBeQjICvCexZln9KRLRNEf92n+VrI/TT0yhDpDhGM5XXKFSh66WQWuUYgxHGbMiDUrkPS1PWpqSlGRPGdk1kKyfRCjFwb9dZfuzWqcuLa3dvjOdN1qONRe5gjXd/ufMtBcMjF9AgxdxXACsEKG2qGRRSUF/Adr+/jfg7/B99x3/8x4qL9lVQd+d+bqP4IZJQzkPI92exDr50SeUQepqNuSqqKiB49DYU2ZHSIQ56KfcpAvqDJnz2eo2njGxcF8jIvteDe7/7HF/5HBXeHMPLXIQ7zj8rXkGWzpS+QRjvEgaHzCR50tKknMX6eFo5NIFl6E2RiuGJfrHwHmPlJrAiGlRG4nDSlTvdgEVmDCRvxJt486N+tk9+szdWeqnFIiDDim7PzsimWoy0F9s9TTMhvcoMr7qPhpDqGTAz+TFy1HIvPzQsA20rwiHddmdff+yIGIfTlfPFwQPT4FBKG/3rRHChH4YX1bm6BCFH4kLS/57gl7/omBngFHL6xF3D8uko890KhcgllzN37U=
+  file: build/libs/RoddyToolLib-*.jar
+  file_glob: true
+  on:
+    repo: eilslabs/RoddyToolLib
+    branch: master
+    tags: true
+  overwrite: true
+  

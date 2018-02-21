@@ -6,12 +6,15 @@
 
 package de.dkfz.roddy.tools
 
-
 import de.dkfz.roddy.StringConstants
-import de.dkfz.roddy.execution.io.ExecutionHelper
+import de.dkfz.roddy.execution.io.LocalExecutionHelper
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.FileUtils
+
+import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.PosixFileAttributeView
+import java.nio.file.attribute.PosixFilePermissions
 
 /**
  * Contains methods which print out text on the console, like listworkflows.
@@ -67,19 +70,26 @@ class RoddyIOHelperMethods {
 
         @Override
         void compressFile(File from, File to, File workingDirectory = null) {
-            compressDirectory(from, to, workingDirectory);
+            try {
+                compressDirectory(from, to, workingDirectory);
+            } catch (Exception ex) {
+                throw new IOException("Could not zip file ${from} to zip archive ${to}", ex)
+            }
         }
 
         @Override
         void compressDirectory(File from, File to, File workingDirectory = null) {
 
-            String result = ExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
-//            println(result);
+            try {
+                String result = LocalExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
+            } catch (Exception ex) {
+                throw new IOException("Could not zip folder ${from} to zip archive ${to}", ex)
+            }
         }
 
         @Override
         void decompress(File from, File to, File workingDirectory = null) {
-            String result = ExecutionHelper.executeSingleCommand(getDecompressionString(from, to, workingDirectory));
+            String result = LocalExecutionHelper.executeSingleCommand(getDecompressionString(from, to, workingDirectory));
 //            println(result);
         }
 
@@ -164,16 +174,41 @@ class RoddyIOHelperMethods {
 
     /**
      * This method copies a file and tries to preserve access rights using Java get/set rights methods.
+     *
+     * Modified after http://docs.oracle.com/javase/8/docs/api/.
+     *
      * @param src
      * @param tgt
      */
-    public static void copyDirectory(File src, File tgt) {
-        try {
-            FileUtils.copyDirectory(src, tgt)
-            tgt.setReadable(src.canRead())
-            tgt.setWritable(src.canWrite())
-            tgt.setExecutable(src.canExecute())
+    static void copyDirectory(File source, File target, CopyOption... options = [StandardCopyOption.COPY_ATTRIBUTES]) {
+        copyDirectory(source.toPath(), target.toPath(), options)
+    }
 
+    static void copyDirectory(Path source, Path target, CopyOption... options = [StandardCopyOption.COPY_ATTRIBUTES]) {
+        try {
+            Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
+                    new SimpleFileVisitor<Path>() {
+                        @Override
+                        FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                                throws IOException {
+                            Path targetdir = target.resolve(source.relativize(dir))
+                            // I am not happy with the fuzzy specification in the Java API concerning symlinks.
+                            try {
+                                Files.copy(dir, targetdir, options)
+                            } catch (FileAlreadyExistsException e) {
+                                if (!Files.isDirectory(targetdir))
+                                    throw e
+                            }
+                            return FileVisitResult.CONTINUE
+                        }
+
+                        @Override
+                        FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                                throws IOException {
+                            Files.copy(file, target.resolve(source.relativize(file)), options)
+                            return FileVisitResult.CONTINUE
+                        }
+                    })
         } catch (Exception ex) {
             logger.severe(ex.toString())
         }
@@ -200,6 +235,10 @@ class RoddyIOHelperMethods {
         }
     }
 
+    public static String join(String separator = "\n", String... entries) {
+        return joinArray(entries as String[], separator)
+    }
+
     public static String joinArray(Object[] array, String separator) {
         return array.collect { it -> it.toString() }.join(separator);
     }
@@ -218,10 +257,20 @@ class RoddyIOHelperMethods {
 
     public static String getMD5OfFile(File f) {
         try {
-            DigestUtils.md5Hex(new FileInputStream(f));
+            return DigestUtils.md5Hex(new FileInputStream(f));
         } catch (Exception ex) {
             logger.warning("Could not md5 file ${f.absolutePath} " + ex.toString());
             return "";
+        }
+    }
+
+    public static String getMD5OfPermissions(File f) {
+        try {
+            PosixFileAttributeView view = Files.getFileAttributeView(f.toPath(), PosixFileAttributeView.class) as PosixFileAttributeView
+            return DigestUtils.md5Hex(PosixFilePermissions.toString(view.readAttributes().permissions()))
+        } catch (Exception ex) {
+            logger.warning("Could not md5 permissions string for file ${f.absolutePath}" + ex.toString())
+            return ""
         }
     }
 
@@ -238,12 +287,29 @@ class RoddyIOHelperMethods {
     }
 
     /**
+     * Recursively find all files in a directory, create their md5 sum and combine the sums to a single sum
+     * (without directory names!!)
+     * @param baseDirectory
+     * @return
+     */
+    static String getSingleMD5OfFilesInDirectoryExcludingDirectoryNames(File baseDirectory) {
+        List<File> list = []
+        baseDirectory.eachFileRecurse(FileType.FILES) { File aFile -> list << aFile }
+        getMD5OfText(list.sort().collect { getMD5OfFile(it) }.join(System.getProperty("line.separator")))
+    }
+
+    @Deprecated
+    static String getSingleMD5OfFiles(File baseDirectory) {
+        return getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(baseDirectory)
+    }
+
+    /**
      * The method finds all files in a directory, creates an md5sum of each baseDirectory and md5'es the result text.
      * This is i.e. useful when the folder has to be archived and the archives content should be comparable.
      * @param baseDirectory
      * @return
      */
-    static String getSingleMD5OfFilesInDirectory(File baseDirectory) {
+    static String getSingleMD5OfFilesInDirectoryIncludingDirectoryNamesAndPermissions(File baseDirectory) {
         List<File> list = []
         List<String> md5s = []
         baseDirectory.eachFileRecurse(FileType.FILES) { File aFile -> list << aFile }
@@ -252,7 +318,8 @@ class RoddyIOHelperMethods {
             File file ->
                 String md5OfDir = getMD5OfText(baseDirectory.name + file.absolutePath - baseDirectory.absolutePath)
                 String md5OfFile = getMD5OfFile(file)
-                md5s << md5OfDir + md5OfFile
+                String md5OfPermissions = getMD5OfPermissions(file)
+                md5s << md5OfDir + md5OfFile + md5OfPermissions
         }
         return getMD5OfText(md5s.join(System.getProperty("line.separator")));
     }
@@ -277,7 +344,7 @@ class RoddyIOHelperMethods {
 
     private static final String calculateUMaskFromStringWithBash(String rightsStr, int defaultUserMask) {
         def defaultRights = numericToHashAccessRights(defaultUserMask)
-        return ExecutionHelper.executeSingleCommand("umask ${defaultRights}; umask ${rightsStr}; umask");
+        return LocalExecutionHelper.executeSingleCommand("umask ${defaultRights.values().join("")} && umask ${rightsStr} && umask");
     }
 
     public static final String convertUMaskToAccessRights(String umask) {
@@ -310,7 +377,7 @@ class RoddyIOHelperMethods {
 
     }
 
-    public static Map<String, Integer> numericToHashAccessRights(int rights) {
+    public static LinkedHashMap<String, Integer> numericToHashAccessRights(int rights) {
         assert rights <= 07777  // including suid, sgid, sticky bits.
         return [u: (rights & 0700) >> 6,
                 g: (rights & 0070) >> 3,
@@ -324,7 +391,7 @@ class RoddyIOHelperMethods {
      * @return
      */
     public static ArrayList<String> splitPathname(String pathname) {
-        pathname.split(StringConstants.SPLIT_SLASH).findAll({it != ""}) as ArrayList<String>
+        pathname.split(StringConstants.SPLIT_SLASH).findAll({ it != "" }) as ArrayList<String>
     }
 
     public static Optional<Integer> findComponentIndexInPath(String path, String component) {
@@ -341,9 +408,9 @@ class RoddyIOHelperMethods {
      *  pattern and the path. If there is a mismatch, a RuntimeException is raised. Only the first match
      *  is considered. Later path components may diverge.
      *
-     * @param pattern    Path pattern, e.g. /path/to/${variable}/to/be/matched
-     * @param variable   Variable to be matched, e.g. pid. ${variable} will be searched for in pattern.
-     * @param path       Path containing the value. The path value that is matched in here will be returned
+     * @param pattern Path pattern, e.g. /path/to/${variable}/to/be/matched
+     * @param variable Variable to be matched, e.g. pid. ${variable} will be searched for in pattern.
+     * @param path Path containing the value. The path value that is matched in here will be returned
      * @return
      */
     public static Optional<String> getPatternVariableFromPath(String pattern, String variable, String path) {

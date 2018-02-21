@@ -8,6 +8,7 @@ package de.dkfz.roddy.tools.conversion
 
 import de.dkfz.roddy.tools.RoddyConversionHelperMethods
 import groovy.transform.CompileStatic
+import groovy.util.slurpersupport.NodeChild
 
 /**
  * Created by heinold on 14.07.16.
@@ -104,15 +105,23 @@ class RoddyConversionHelperMethodsTest extends GroovyTestCase {
      * Test is here for low level of method logic. Nearly all the logic is in
      * the conversion methods.
      */
-   /* void testDetermineTypeOfValue() {
-        assert ConfigurationValue.determineTypeOfValue("( a b c )") == "bashArray"
-        assert ConfigurationValue.determineTypeOfValue('"( a b c )"') == "string"
-        assert ConfigurationValue.determineTypeOfValue("'( a b c )'") == "string"
-        assert ConfigurationValue.determineTypeOfValue("1.0") == "double"
-        assert ConfigurationValue.determineTypeOfValue("1.0f") == "float"
-        assert ConfigurationValue.determineTypeOfValue("1") == "integer"
-        assert ConfigurationValue.determineTypeOfValue("") == "string"
-        assert ConfigurationValue.determineTypeOfValue("ba") == "string"
+    /* void testDetermineTypeOfValue() {
+         assert ConfigurationValue.determineTypeOfValue("( a b c )") == "bashArray"
+         assert ConfigurationValue.determineTypeOfValue('"( a b c )"') == "string"
+         assert ConfigurationValue.determineTypeOfValue("'( a b c )'") == "string"
+         assert ConfigurationValue.determineTypeOfValue("1.0") == "double"
+         assert ConfigurationValue.determineTypeOfValue("1.0f") == "float"
+         assert ConfigurationValue.determineTypeOfValue("1") == "integer"
+         assert ConfigurationValue.determineTypeOfValue("") == "string"
+         assert ConfigurationValue.determineTypeOfValue("ba") == "string"
+     }
+ */
+
+    NodeChild buildNodeChild() {
+        return (NodeChild) new XmlSlurper().parseText("<test><a/></test>")
     }
-*/
+
+    void testToFormattedXML() {
+        assert RoddyConversionHelperMethods.toFormattedXML(buildNodeChild()) == "  <test>\n    <a/>\n  </test>"
+    }
 }
