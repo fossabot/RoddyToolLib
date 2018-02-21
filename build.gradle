@@ -9,6 +9,7 @@ plugins {
 }
 
 apply plugin: 'groovy'
+apply plugin: 'maven'
 
 group = "com.github.eilslabs"
 
@@ -44,11 +45,34 @@ task wrapper(type: Wrapper) {
     gradleVersion = '4.2.1'
 }
 
+task writePom {
+    doLast {
+        pom {
+            project {
+                version rootProject.version
+                inceptionYear '2017'
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'https://raw.githubusercontent.com/eilslabs/RoddyToolLib/master/LICENSE'
+                        distribution 'repo'
+                    }
+                }
+            }
+        }.writeTo("$buildDir/pom.xml")
+    }
+}
+
 jar {
     version = getVersionName()
     manifest {
         attributes("Implementation-Vendor": "German Cancer Research Center (DKFZ)")
         attributes("Implementation-Title": baseName)
         attributes 'Implementation-Version': rootProject.version
+    }
+
+    dependsOn writePom
+    into("META-INF/maven/$project.group/$project.name") {
+        from "$buildDir/pom.xml"
     }
 }
