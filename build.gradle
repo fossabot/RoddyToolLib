@@ -22,6 +22,8 @@ def getVersionName() {
     return grgit.describe() + dirtySuffix
 }
 
+rootProject.version = getVersionName()
+
 repositories {
     mavenCentral()
 }
@@ -45,6 +47,8 @@ task wrapper(type: Wrapper) {
 jar {
     version = getVersionName()
     manifest {
-        attributes("Implementation-Version": version)
+        attributes("Implementation-Vendor": "German Cancer Research Center (DKFZ)")
+        attributes("Implementation-Title": baseName)
+        attributes 'Implementation-Version': rootProject.version
     }
 }
