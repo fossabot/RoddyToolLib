@@ -390,11 +390,18 @@ class RoddyIOHelperMethods {
      * @param pathname
      * @return
      */
-    public static ArrayList<String> splitPathname(String pathname) {
+    static ArrayList<String> splitPathname(String pathname) {
         pathname.split(StringConstants.SPLIT_SLASH).findAll({ it != "" }) as ArrayList<String>
     }
 
-    public static Optional<Integer> findComponentIndexInPath(String path, String component) {
+    /** Note that this method uses splitPathname(), which ignores empty path elements, e.g. the element in leading '/' or between '//'. This means
+     *  that if you need both (index and value) you need to take splitPathname().
+     *
+     * @param path
+     * @param component
+     * @return
+     */
+    static Optional<Integer> findComponentIndexInPath(String path, String component) {
         Integer index = splitPathname(path).findIndexOf { it -> it == component }
         if (-1 == index) {
             Optional.empty()
