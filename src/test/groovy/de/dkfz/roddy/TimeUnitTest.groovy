@@ -67,20 +67,20 @@ public class TimeUnitTest {
     }
 
     @Test
-    void testAlignToHours() throws Exception {
-        assert new TimeUnit("07:12:00:00").alignToHours() == "${7 * 24 + 12}:00:00"
+    void testToHourString() throws Exception {
+        assert new TimeUnit("07:12:00:00").toHourString() == "${7 * 24 + 12}:00:00"
     }
 
     @Test
-    void testAlignToMinutes() throws Exception {
-        assert new TimeUnit("07:12:00:00").alignToMinutes() == "${(7 * 24 + 12)*60}:00"
-        assert new TimeUnit("07:12:10:20").alignToMinutes() == "${(7 * 24 + 12)*60 + 10}:20"
+    void testToMinuteString() throws Exception {
+        assert new TimeUnit("07:12:00:00").toMinuteString() == "${(7 * 24 + 12)*60}:00"
+        assert new TimeUnit("07:12:10:20").toMinuteString() == "${(7 * 24 + 12)*60 + 10}:20"
     }
 
     @Test
-    void testAlignToSeconds() throws Exception {
-        assert new TimeUnit("07:12:00:00").alignToSeconds() == "${(7 * 24 + 12)*3600}"
-        assert new TimeUnit("07:12:10:20").alignToSeconds() == "${(7 * 24 + 12)*3600 + 620}"
+    void testToSecondString() throws Exception {
+        assert new TimeUnit("07:12:00:00").toSecondString() == "${(7 * 24 + 12)*3600}"
+        assert new TimeUnit("07:12:10:20").toSecondString() == "${(7 * 24 + 12)*3600 + 620}"
     }
 
     @Test(expected = NumberFormatException)

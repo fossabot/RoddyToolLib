@@ -152,13 +152,13 @@ class TimeUnit {
         return timeString
     }
 
-    String alignToHours() {
+    String toHourString() {
         String[] split = timeString.split("[:]")
         String result = [split[0].toInteger() * 24 + split[1].toInteger(), split[2], split[3]].join(":")
         return result
     }
 
-    String alignToMinutes() {
+    String toMinuteString() {
         String[] split = timeString.split("[:]")
         String result = [
                 (split[0].toInteger() * 24 + split[1].toInteger()) * 60 + split[2].toInteger(), split[3]
@@ -166,7 +166,7 @@ class TimeUnit {
         return result
     }
 
-    String alignToSeconds() {
+    String toSecondString() {
         String[] split = timeString.split("[:]")
         String result = ((split[0].toInteger() * 24 + split[1].toInteger()) * 60 + split[2].toInteger()) * 60 + split[3].toInteger()
         return result
