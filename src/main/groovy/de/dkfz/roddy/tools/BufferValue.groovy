@@ -67,11 +67,22 @@ public class BufferValue {
         this.baseUnit = baseUnit;
     }
 
-    public String toString(BufferUnit unit = BufferUnit.M) {
+    String toString(BufferUnit unit = BufferUnit.M) {
+        return toStringWithUnit(unit)
+    }
+
+    String toStringWithUnit(BufferUnit unit = BufferUnit.M) {
         if (alignedValue * baseUnit.multiplier < unit.multiplier) {
             return "" + alignedValue + baseUnit.name();
         }
         return "" + (alignedValue * baseUnit.multiplier / unit.multiplier as Long) + unit.name()
+    }
+
+    String toResourceStringWithoutUnit(BufferUnit unit = BufferUnit.M) {
+        if (alignedValue * baseUnit.multiplier < unit.multiplier) {
+            return "" + alignedValue
+        }
+        return "" + (alignedValue * baseUnit.multiplier / unit.multiplier as Long)
     }
 
     public Long toLong(BufferUnit unit = BufferUnit.M) {
