@@ -66,6 +66,23 @@ public class TimeUnitTest {
         }
     }
 
+    @Test
+    void testToHourString() throws Exception {
+        assert new TimeUnit("07:12:00:00").toHourString() == "${7 * 24 + 12}:00:00"
+    }
+
+    @Test
+    void testToMinuteString() throws Exception {
+        assert new TimeUnit("07:12:00:00").toMinuteString() == "${(7 * 24 + 12)*60}:00"
+        assert new TimeUnit("07:12:10:20").toMinuteString() == "${(7 * 24 + 12)*60 + 10}:20"
+    }
+
+    @Test
+    void testToSecondString() throws Exception {
+        assert new TimeUnit("07:12:00:00").toSecondString() == "${(7 * 24 + 12)*3600}"
+        assert new TimeUnit("07:12:10:20").toSecondString() == "${(7 * 24 + 12)*3600 + 620}"
+    }
+
     @Test(expected = NumberFormatException)
     public void testInvalidWalltimeString2() {
         new TimeUnit("3:5.25")

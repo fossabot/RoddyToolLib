@@ -79,9 +79,9 @@ class TimeUnit {
             String[] newStrList = ["00", "00", "00", "00"]
 
             //Check if the string contains anything else than the unit and dots.
-            String validationString = str[-1].isNumber() ? str : str[0 .. -2]
+            String validationString = str[-1].isNumber() ? str : str[0..-2]
             for (int i = 0; i < validationString.size(); i++) {
-                if(validationString[i].isNumber() || validationString[i] == ".") continue
+                if (validationString[i].isNumber() || validationString[i] == ".") continue
                 throw new NumberFormatException("The unit string ${validationString} may only contain dots and number followed by a unit.")
             }
 
@@ -139,7 +139,7 @@ class TimeUnit {
     }
 
     static TimeUnit fromDuration(Duration duration) {
-        return new TimeUnit(duration.getSeconds()+"s")
+        return new TimeUnit(duration.getSeconds() + "s")
     }
 
     Duration asDuration() {
@@ -150,5 +150,25 @@ class TimeUnit {
     @Override
     String toString() {
         return timeString
+    }
+
+    String toHourString() {
+        String[] split = timeString.split("[:]")
+        String result = [split[0].toInteger() * 24 + split[1].toInteger(), split[2], split[3]].join(":")
+        return result
+    }
+
+    String toMinuteString() {
+        String[] split = timeString.split("[:]")
+        String result = [
+                (split[0].toInteger() * 24 + split[1].toInteger()) * 60 + split[2].toInteger(), split[3]
+        ].join(":")
+        return result
+    }
+
+    String toSecondString() {
+        String[] split = timeString.split("[:]")
+        String result = ((split[0].toInteger() * 24 + split[1].toInteger()) * 60 + split[2].toInteger()) * 60 + split[3].toInteger()
+        return result
     }
 }
