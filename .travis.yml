@@ -16,7 +16,7 @@ deploy:
   file: build/libs/RoddyToolLib-*.jar
   file_glob: true
   on:
-    repo: eilslabs/RoddyToolLib
+    repo: TheRoddyWMS/RoddyToolLib
     branch: master
     tags: true
   overwrite: true
