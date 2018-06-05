@@ -23,10 +23,10 @@ class VersionIntervalSpec extends Specification  {
 
         // At default VersionLevel.
         interval.contains(new Version(1, 1, 0, 0))
-        interval.contains(new Version(1, 2,0,11))
+        interval.contains(new Version(1, 2, 0, 11))
 
         !interval.contains(new Version(1, 0, 0, 0))
-        !interval.contains(new Version(1, 2,1,0))
+        !interval.contains(new Version(1, 2, 1, 0))
 
     }
 
