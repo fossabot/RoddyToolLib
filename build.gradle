@@ -11,7 +11,7 @@ plugins {
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-group = "com.github.eilslabs"
+group = "com.github.theroddywms"
 
 
 /*
